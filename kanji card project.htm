@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Modul N3</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            font-family: Arial, sans-serif;
+            overflow: hidden; /* Mencegah scroll berlebih */
+        }
+
+        /* Gambar paling belakang */
+        .background-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://github.com/jvxtgzg/kanji-card-project/raw/main/bg.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -2;
+        }
+
+        /* Gambar kuning fix dengan efek bayangan */
+        .foreground-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: -1;
+        }
+
+        .container {
+            width: 90vw;
+            max-width: 400px;
+            text-align: center;
+            z-index: 2;
+            position: relative;
+        }
+
+        /* Tombol About */
+        .about-button {
+            position: fixed; /* Tetap di posisi saat scroll */
+            top: 10px;
+            right: 10px;
+            width: 40px; /* Ukuran default */
+            height: 40px;
+            cursor: pointer;
+            z-index: 5; /* Di atas semua elemen lainnya */
+            transition: opacity 0.3s ease;
+        }
+
+        /* Responsif untuk tablet */
+        @media only screen and (max-width: 768px) {
+            .module-content {
+                padding: 8px;
+                font-size: 4vw;
+            }
+
+            .module-item {
+                width: 80px;
+                height: 120px;
+            }
+
+            .module-item .text-overlay {
+                font-size: 14px;
+            }
+
+            .about-button {
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        /* Responsif untuk mobile */
+        @media only screen and (max-width: 480px) {
+            .module-content {
+                padding: 5px;
+                font-size: 5vw;
+            }
+
+            .module-item {
+                width: 70px;
+                height: 105px;
+            }
+
+            .module-item .text-overlay {
+                font-size: 12px;
+            }
+
+            .about-button {
+                width: 30px;
+                height: 30px;
+            }
+        }
+
+        .module-content {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            padding: 10px;
+            margin-top: -45px; /* Adjust margin to prevent overlap */
+        }
+
+        .module-item {
+            position: relative;
+            width: 90px;
+            height: 135px;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .module-item:hover {
+            transform: scale(1.1);
+        }
+
+        .module-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.75;
+            border-radius: 15px;
+        }
+
+        .module-item .text-overlay {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Styling untuk link */
+        .module-link {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* Optional: Hover effect untuk module-link */
+        .module-link:hover .module-item {
+            transform: scale(1.1);
+        }
+
+        /* Menu About */
+        .about-menu {
+            position: fixed;
+            top: 60px; /* Slightly below the About button */
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            padding: 10px;
+            display: none; /* Hidden by default */
+            z-index: 6;
+            width: 150px;
+        }
+
+        .about-menu button {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: none;
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+
+        .about-menu button:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Modal Styling */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(255, 255, 255, 0.98);
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+            display: none; /* Hidden by default */
+            z-index: 7;
+            max-width: 80%;
+            text-align: center;
+        }
+
+        .modal-content {
+            margin-bottom: 20px;
+            font-size: 16px;
+            color: #333;
+        }
+
+        /* Close Button */
+        .close-button {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            font-weight: bold;
+            color: #aaa;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-button:hover {
+            color: #000;
+        }
+
+        /* Overlay untuk modals */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            display: none; /* Hidden by default */
+            z-index: 5;
+        }
+
+        /* Pilihan Kontak */
+        .contact-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .contact-options button {
+            padding: 10px 20px;
+            border: none;
+            background-color: #2196F3;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 14px;
+        }
+
+        .contact-options button:hover {
+            background-color: #0b7dda;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- Gambar paling belakang -->
+    <div class="background-image"></div>
+
+    <!-- Gambar kuning fix dengan efek bayangan -->
+    <img src="https://github.com/jvxtgzg/kanji-card-project/blob/ef1b206669cfa1dcd310444ba220aaf91ff50c78/bg%20kuning%20fix.png?raw=true" class="foreground-image" alt="Gambar Kuning dengan Efek Bayangan">
+
+    <!-- Tombol About -->
+    <img src="https://github.com/jvxtgzg/kanji-card-project/raw/main/buttin%20about.png" alt="About" class="about-button" id="aboutButton" title="About">
+
+    <!-- Menu About -->
+    <div class="about-menu" id="aboutMenu">
+        <button id="tentangButton">TENTANG</button>
+        <button id="kontakButton">KONTAK</button>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Modal TENTANG -->
+    <div class="modal" id="tentangModal">
+        <span class="close-button" id="closeTentang">&times;</span>
+        <div class="modal-content">
+            おはよう！！みんなさん。。。
+            <br><br>
+            Ini adalah tampilan HTML web sederhana yang sudah dimodifikasi untuk keperluan belajar Kotoba N3 dan kanjinya. Dukung saya untuk menambah lebih banyak kanji card ya!! Ini masih dalam tahap pengembangan. お疲れ様でした！
+        </div>
+    </div>
+
+    <!-- Modal KONTAK -->
+    <div class="modal" id="kontakModal">
+        <span class="close-button" id="closeKontak">&times;</span>
+        <div class="modal-content">
+            Pilih Metode Kontak:
+        </div>
+        <div class="contact-options">
+            <button id="emailButton">E-mail</button>
+            <button id="instagramButton">Instagram</button>
+        </div>
+    </div>
+
+    <!-- Modal Email -->
+    <div class="modal" id="emailModal">
+        <span class="close-button" id="closeEmail">&times;</span>
+        <div class="modal-content">
+            Email: <a href="mailto:tegarinzone@gmail.com">tegarinzone@gmail.com</a>
+        </div>
+    </div>
+
+    <!-- Modal Instagram -->
+    <div class="modal" id="instagramModal">
+        <span class="close-button" id="closeInstagram">&times;</span>
+        <div class="modal-content">
+            <a href="https://www.instagram.com/jvx.tg_zg/profilecard/?igsh=MTJ3eWZjOGRkMXdvdw==" target="_blank" rel="noopener noreferrer">Kunjungi Instagram Saya</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="module-content">
+            <!-- Modul Pembelajaran (dengan link) -->
+            <a href="https://docs.google.com/document/d/1ZguhKJytAYdlyD4gSSHiq-nGNcv6OxSE/edit?usp=sharing&ouid=106847982978182926598&rtpof=true&sd=true" class="module-link" aria-label="Modul Pembelajaran" target="_blank" rel="noopener noreferrer">
+                <div class="module-item">
+                    <img src="https://github.com/jvxtgzg/kanji-card-project/raw/main/modul.jpeg" alt="Modul Pembelajaran">
+                    <div class="text-overlay">Modul</div>
+                </div>
+            </a>
+
+            <!-- N3 Bagian 1 (dengan link) -->
+            <a href="https://jvxtgzg.github.io/kanji-card-project/KANJI%20CARD%20N3%20Pt1.htm" class="module-link" aria-label="Modul N3 Bagian 1" target="_blank" rel="noopener noreferrer">
+                <div class="module-item">
+                    <img src="https://github.com/jvxtgzg/kanji-card-project/raw/main/n3%201.jpeg" alt="Modul N3 Bagian 1">
+                    <div class="text-overlay">N3/1</div>
+                </div>
+            </a>
+
+            <!-- N3 Bagian 2 (dengan link) -->
+            <a href="https://jvxtgzg.github.io/kanji-card-project/KANJI%20CARD%20N3%20Pt2.html" class="module-link" aria-label="Modul N3 Bagian 2" target="_blank" rel="noopener noreferrer">
+                <div class="module-item">
+                    <img src="https://github.com/jvxtgzg/kanji-card-project/raw/main/n3%202.jpeg" alt="Modul N3 Bagian 2">
+                    <div class="text-overlay">N3/2</div>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Mengganti gambar foreground-image (kuning fix)
+        const foregroundImage = document.querySelector('.foreground-image');
+        foregroundImage.src = 'https://github.com/jvxtgzg/kanji-card-project/blob/ef1b206669cfa1dcd310444ba220aaf91ff50c78/bg%20kuning%20fix.png?raw=true';
+
+        // Get Elements
+        const aboutButton = document.getElementById('aboutButton');
+        const aboutMenu = document.getElementById('aboutMenu');
+        const overlay = document.getElementById('overlay');
+
+        const tentangButton = document.getElementById('tentangButton');
+        const kontakButton = document.getElementById('kontakButton');
+
+        const tentangModal = document.getElementById('tentangModal');
+        const kontakModal = document.getElementById('kontakModal');
+        const emailModal = document.getElementById('emailModal');
+        const instagramModal = document.getElementById('instagramModal');
+
+        const closeTentang = document.getElementById('closeTentang');
+        const closeKontak = document.getElementById('closeKontak');
+        const closeEmail = document.getElementById('closeEmail');
+        const closeInstagram = document.getElementById('closeInstagram');
+
+        const emailButton = document.getElementById('emailButton');
+        const instagramButton = document.getElementById('instagramButton');
+
+        // Toggle About Menu
+        aboutButton.addEventListener('click', (e) => {
+            e.stopPropagation(); // Mencegah event bubbling
+            const isMenuVisible = aboutMenu.style.display === 'block';
+            aboutMenu.style.display = isMenuVisible ? 'none' : 'block';
+            overlay.style.display = isMenuVisible ? 'none' : 'block';
+        });
+
+        // Close About Menu and Modals when clicking outside
+        overlay.addEventListener('click', () => {
+            aboutMenu.style.display = 'none';
+            overlay.style.display = 'none';
+            closeAllModals();
+        });
+
+        // Open TENTANG Modal
+        tentangButton.addEventListener('click', () => {
+            tentangModal.style.display = 'block';
+            overlay.style.display = 'block';
+            aboutMenu.style.display = 'none';
+        });
+
+        // Open KONTAK Modal
+        kontakButton.addEventListener('click', () => {
+            kontakModal.style.display = 'block';
+            overlay.style.display = 'block';
+            aboutMenu.style.display = 'none';
+        });
+
+        // Close Modals
+        closeTentang.addEventListener('click', () => {
+            tentangModal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        closeKontak.addEventListener('click', () => {
+            kontakModal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        closeEmail.addEventListener('click', () => {
+            emailModal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        closeInstagram.addEventListener('click', () => {
+            instagramModal.style.display = 'none';
+            overlay.style.display = 'none';
+        });
+
+        // Open Email Modal
+        emailButton.addEventListener('click', () => {
+            emailModal.style.display = 'block';
+            overlay.style.display = 'block';
+            kontakModal.style.display = 'none';
+        });
+
+        // Open Instagram Modal
+        instagramButton.addEventListener('click', () => {
+            instagramModal.style.display = 'block';
+            overlay.style.display = 'block';
+            kontakModal.style.display = 'none';
+        });
+
+        // Function to close all modals
+        function closeAllModals() {
+            tentangModal.style.display = 'none';
+            kontakModal.style.display = 'none';
+            emailModal.style.display = 'none';
+            instagramModal.style.display = 'none';
+            overlay.style.display = 'none';
+        }
+
+        // Optional: Close all modals with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeAllModals();
+            }
+        });
+
+        // Prevent clicks inside modals from closing them
+        const modals = document.querySelectorAll('.modal');
+        modals.forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
+        });
+    </script>
+
+</body>
+</html>
