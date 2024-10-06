@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desain Kartu Kanji</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+            position: relative;
+        }
+
+        .card-container {
+            perspective: 1000px;
+            width: 250px;
+            height: 150px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background-color: #a0522d;
+            width: 100%;
+            height: 100%;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 48px;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: transform 0.8s;
+            transform-style: preserve-3d;
+            position: relative;
+        }
+
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+
+        .card-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .card-front {
+            background-color: #a0522d;
+        }
+
+        .card-back {
+            background-color: #ffefd5;
+            color: #333;
+            transform: rotateY(180deg);
+            text-align: center;
+        }
+
+        .furigana {
+            font-size: 12pt;
+            margin-bottom: 5px;
+        }
+
+        .meaning {
+            font-size: 12pt;
+            word-wrap: break-word;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            color: white;
+            transition: background-color 0.3s;
+        }
+
+        .button.melihat {
+            background-color: #ff5c8d;
+        }
+
+        .button.melihat:hover {
+            background-color: #e04e7a;
+        }
+
+        .button.selanjutnya {
+            background-color: #d291ff;
+        }
+
+        .button.selanjutnya:hover {
+            background-color: #b873e6;
+        }
+
+        .reset-button {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .reset-button img {
+            width: 50px;
+            cursor: pointer;
+        }
+
+        /* Animasi Masuk (Fade In) */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-out forwards;
+        }
+
+        /* Animasi Rotasi Berlawanan Jarum Jam */
+        @keyframes rotateCounter {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(-360deg); }
+        }
+
+        .rotate-counter {
+            animation: rotateCounter 1s ease-out;
+        }
+
+        /* Gaya Footer */
+        footer {
+            position: absolute;
+            bottom: 10px;
+            text-align: center;
+            font-size: 14px;
+            color: #555;
+        }
+
+        @media (max-width: 600px) {
+            .card-container {
+                width: 200px;
+                height: 120px;
+            }
+
+            .card {
+                font-size: 36px;
+            }
+
+            .buttons .button {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+
+            .reset-button img {
+                width: 40px;
+            }
+
+            footer {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="card-container">
+        <div class="card" id="card">
+            <div class="card-face card-front" id="kanji">有る</div>
+            <div class="card-face card-back">
+                <div class="furigana" id="furigana">ある</div>
+                <div class="meaning" id="meaning">ada, memiliki</div>
+            </div>
+        </div>
+    </div>
+    <div class="buttons">
+        <button class="button melihat" id="viewButton">melihat</button>
+        <button class="button selanjutnya" id="nextButton">selanjutnya</button>
+    </div>
+    <div class="reset-button" id="resetButton">
+        <img src="https://raw.githubusercontent.com/jvxtgzg/kanji-card-project/874e7050cbbbed4adedc9e5e0835f3f5277ea1d6/undo%20button.png" alt="Reset" id="resetImage">
+    </div>
+
+    <!-- Tambahkan Footer di Bawah -->
+    <footer>
+        KANJI CARD PART 1 (UJI COBA) BY. JAVESUS TEGAR INZAGHI
+    </footer>
+
+    <script>
+        // Daftar Kanji dengan furigana dan artinya
+        const kanjiList = [
+           { kanji: "思う", furigana: "おもう", meaning: "berpikir" },
+            { kanji: "離れる", furigana: "はなれる", meaning: "berpisah" },
+            { kanji: "悲しむ", furigana: "かなしむ", meaning: "bersedih" },
+            { kanji: "隠れる", furigana: "かくれる", meaning: "bersembunyi" },
+            { kanji: "掃除する", furigana: "そうじする", meaning: "bersih-bersih" },
+            { kanji: "輝く", furigana: "かがやく", meaning: "bersinar" },
+            { kanji: "悩む", furigana: "なやむ", meaning: "bersusah hati" },
+            { kanji: "伺う", furigana: "うかがう", meaning: "bertanya" },
+            { kanji: "戦う", furigana: "たたかう", meaning: "bertarung" },
+            { kanji: "出会う", furigana: "であう", meaning: "bertemu" },
+            { kanji: "喧嘩する", furigana: "けんかする", meaning: "bertengkar" },
+            { kanji: "叫ぶ", furigana: "さけぶ", meaning: "berteriak" },
+            { kanji: "感謝する", furigana: "かんしゃする", meaning: "berterima kasih" },
+            { kanji: "婚約する", furigana: "こんやくする", meaning: "bertunangan" },
+            { kanji: "努力する", furigana: "どりょくする", meaning: "berusaha keras" },
+            { kanji: "観光する", furigana: "かんこうする", meaning: "berwisata" },
+            { kanji: "出来る", furigana: "できる", meaning: "bisa" },
+            { kanji: "自殺する", furigana: "じさつする", meaning: "bunuh diri" },
+            { kanji: "適する", furigana: "てきする", meaning: "cocok" },
+            { kanji: "似合う", furigana: "にあう", meaning: "cocok, sesuai" },
+            { kanji: "効く", furigana: "きく", meaning: "efektif" },
+            { kanji: "好む", furigana: "このむ", meaning: "gemar, menyukai" },
+            { kanji: "騒ぐ", furigana: "さわぐ", meaning: "gempar" },
+            { kanji: "緊張する", furigana: "きんちょうする", meaning: "gugup" },
+            { kanji: "希望する", furigana: "きぼうする", meaning: "hendak" },
+            { kanji: "暮らす", furigana: "くらす", meaning: "hidup" },
+            { kanji: "気に入る", furigana: "きにいる", meaning: "jadi penasaran, jadi pikiran" },
+            { kanji: "散歩する", furigana: "さんぽする", meaning: "jalan jalan" },
+            { kanji: "飽きる", furigana: "あきる", meaning: "jenuh" },
+            { kanji: "劣る", furigana: "おとる", meaning: "kalah" },
+            { kanji: "混乱する", furigana: "こんらんする", meaning: "kalut, melakukan kekacauan" },
+            { kanji: "がっかりする", furigana: "がっかりする", meaning: "kecewa" },
+            { kanji: "失望する", furigana: "しつぼうする", meaning: "kecewa" },
+            { kanji: "失う", furigana: "うしなう", meaning: "kehilangan" },
+            { kanji: "欠ける", furigana: "かける", meaning: "kekurangan" },
+            { kanji: "外出する", furigana: "がいしゅつする", meaning: "keluar" },
+            { kanji: "当たる", furigana: "あたる", meaning: "kena" },
+            { kanji: "相談する", furigana: "そうだんする", meaning: "konsultasi" }
+        ];
+
+        // Fungsi untuk mengacak daftar Kanji
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        let shuffledKanji = shuffleArray([...kanjiList]);
+        let currentIndex = 0;
+
+        const kanjiElement = document.getElementById('kanji');
+        const furiganaElement = document.getElementById('furigana');
+        const meaningElement = document.getElementById('meaning');
+        const viewButton = document.getElementById('viewButton');
+        const nextButton = document.getElementById('nextButton');
+        const card = document.getElementById('card');
+        const resetButton = document.getElementById('resetButton');
+        const resetImage = document.getElementById('resetImage');
+
+        // Fungsi untuk menampilkan Kanji berdasarkan indeks
+        function showKanji(index) {
+            if (index < shuffledKanji.length) {
+                kanjiElement.textContent = shuffledKanji[index].kanji;
+                furiganaElement.textContent = shuffledKanji[index].furigana;
+                meaningElement.textContent = shuffledKanji[index].meaning;
+                card.classList.remove('flipped'); // Pastikan kartu dalam posisi depan
+                viewButton.textContent = 'melihat';
+                nextButton.disabled = false;
+                resetButton.style.display = 'none';
+            } else {
+                kanjiElement.textContent = "Selesai!";
+                furiganaElement.textContent = "";
+                meaningElement.textContent = "";
+                nextButton.disabled = true;
+                viewButton.disabled = true;
+                showResetButton();
+            }
+        }
+
+        // Fungsi untuk menampilkan tombol reset dengan animasi masuk
+        function showResetButton() {
+            resetButton.style.display = 'block';
+            // Hapus kelas animasi yang mungkin masih ada
+            resetImage.classList.remove('fade-in');
+            // Trigger reflow untuk memastikan animasi dapat dipicu ulang
+            void resetImage.offsetWidth;
+            // Tambahkan kelas animasi masuk
+            resetImage.classList.add('fade-in');
+        }
+
+        // Event listener untuk tombol "Melihat"
+        viewButton.addEventListener('click', () => {
+            if (currentIndex < shuffledKanji.length) {
+                card.classList.toggle('flipped');
+                if (card.classList.contains('flipped')) {
+                    viewButton.textContent = 'sembunyikan';
+                } else {
+                    viewButton.textContent = 'melihat';
+                }
+            }
+        });
+
+        // Event listener untuk tombol "Selanjutnya"
+        nextButton.addEventListener('click', () => {
+            currentIndex++;
+            showKanji(currentIndex);
+        });
+
+        // Event listener untuk tombol "Reset"
+        resetButton.addEventListener('click', () => {
+            // Tambahkan kelas animasi rotasi berlawanan jarum jam
+            resetImage.classList.add('rotate-counter');
+            // Tambahkan event listener untuk menghapus kelas setelah animasi selesai
+            resetImage.addEventListener('animationend', function handler() {
+                resetImage.classList.remove('rotate-counter');
+                resetImage.removeEventListener('animationend', handler);
+            });
+            // Reset daftar Kanji
+            shuffledKanji = shuffleArray([...kanjiList]);
+            currentIndex = 0;
+            showKanji(currentIndex);
+            viewButton.disabled = false;
+            // Sembunyikan tombol reset setelah reset
+            resetButton.style.display = 'none';
+        });
+
+        // Inisialisasi tampilan pertama
+        showKanji(currentIndex);
+    </script>
+</body>
+</html>
